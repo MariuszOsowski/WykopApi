@@ -5,7 +5,6 @@
 //  Created by Mariusz Osowski on 25/02/2023.
 //
 
-
 import Foundation
 
 public protocol WykopApiLoginDelegate: AnyObject {
@@ -18,10 +17,15 @@ public final class WykopApi {
     let authenticationManager: AuthenticationProtocol
     public let users: Users
     public weak var delegate: WykopApiLoginDelegate?
-    
+
     public init(key: String, secret: String) {
         apiClient = WykopApiClient()
-        authenticationManager = Authenticator(apiClient: apiClient, keychain: KeychainWrapper(service: "WypokApp"), tokenValidator: TokenValidator(tokenDecoder: TokenDecoder()), tokenDecoder: TokenDecoder(), secret: secret, key: key)
+        authenticationManager = Authenticator(apiClient: apiClient,
+                                              keychain: KeychainWrapper(service: "WypokApp"),
+                                              tokenValidator: TokenValidator(tokenDecoder: TokenDecoder()),
+                                              tokenDecoder: TokenDecoder(),
+                                              secret: secret,
+                                              key: key)
         users = Users(apiClient: apiClient, authenticationManager: authenticationManager)
     }
 
@@ -38,15 +42,15 @@ public final class WykopApi {
     public func logout() async throws {
         try await authenticationManager.logout()
     }
-    
+
     public func login() async throws {
         guard let delegate = delegate else { return }
-        
+
         let authToken = try await authenticationManager.authToken
         let connectUrl = try await apiClient.send(WykopSecurityRequests.ConnectRequest(authToken: authToken)).connectUrl
         delegate.wykopConnect(connectUrl: connectUrl, callback: login(token:refreshToken:))
     }
-    
+
     private func login(token: String, refreshToken: String) {
         Task {
             await authenticationManager.login(token: token, refreshToken: refreshToken)
@@ -61,4 +65,3 @@ public extension WykopApi.Users {
         return try await apiClient.send(WykopUsersRequests.AutocompleteRequest(query: query, authToken: authToken))
     }
 }
-

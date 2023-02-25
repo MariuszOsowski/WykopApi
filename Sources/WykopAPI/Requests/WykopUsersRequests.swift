@@ -9,19 +9,18 @@ import Foundation
 
 internal struct WykopUsersRequests {
     internal struct AutocompleteRequest: WykopApiRequest {
+        typealias Response = [WKPUserAutocomplete]
+
         var query: String
         var authToken: String
-        
         var method: HTTPMethod = .GET
         var path: String = "/users/autocomplete"
-        
-        typealias Response = [WKPUserAutocomplete]
-        
+
         var queryItems: [URLQueryItem]? {
             [.init(name: "query", value: "\(query)")]
         }
-        
-        var headers: [String : String] {
+
+        var headers: [String: String] {
             return ["Authorization": "Bearer \(authToken)"]
         }
     }

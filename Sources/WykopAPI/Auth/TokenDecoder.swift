@@ -16,13 +16,13 @@ struct TokenPayload: Decodable {
     let username: String
     let expiryDate: Date
     let roles: [String]
-    
+
     enum CodingKeys: String, CodingKey {
         case username
         case roles
         case expiryDate = "exp"
     }
-    
+
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.username = try container.decode(String.self, forKey: .username)
@@ -47,19 +47,19 @@ class TokenDecoder: TokenDecoding {
             throw TokenDecoderError.decodingError
         }
     }
-    
+
     private func getPayload(token: String) throws -> String {
         let parts = token.split(separator: ".")
         guard parts.count == 3 else { throw TokenDecoderError.invalidToken }
-        
+
         return String(parts[1])
     }
-    
+
     private func decodeBase64(base64Encoded: String) throws -> Data {
         guard let data = base64Encoded.urlSafeBase64Decoded() else {
             throw TokenDecoderError.decodingError
         }
-        
+
         return data
     }
 }

@@ -14,7 +14,7 @@ internal enum WykopApiResponse<T: Decodable>: Decodable {
     public init(from decoder: Decoder) throws {
         do {
             self = .result(try WykopApiDataResponse<T>(from: decoder).data)
-        } catch (error: DecodingError.keyNotFound(_, _)) {
+        } catch DecodingError.keyNotFound {
             self = .error(try WykopApiErrorResponse(from: decoder))
         }
     }
@@ -24,7 +24,7 @@ internal struct WykopApiErrorResponse: Decodable, Error {
     let code: Int64
     let hash: String
     let error: Error
-    
+
     internal struct Error: Decodable {
         let message: String
         let key: Int64
