@@ -30,6 +30,12 @@ struct TokenPayload: Decodable {
         let timestamp = try container.decode(TimeInterval.self, forKey: .expiryDate)
         self.expiryDate = Date(timeIntervalSince1970: timestamp)
     }
+
+    init(username: String, expiryDate: Date, roles: [String]) {
+        self.username = username
+        self.expiryDate = expiryDate
+        self.roles = roles
+    }
 }
 
 protocol TokenDecoding {

@@ -8,9 +8,10 @@
 import Foundation
 
 public enum WykopApiError: Error {
-    case underlaying(Error, URLResponse?)
+    case underlaying(Error)
     case invalidUrl
     case noData
     case encodingError(Error)
     case decodingError(Error)
+    case internalError
 }

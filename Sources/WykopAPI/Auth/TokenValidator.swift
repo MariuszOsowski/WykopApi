@@ -8,15 +8,16 @@
 import Foundation
 
 protocol TokenValidating {
-    func isExpired(token: TokenPayload) -> Bool
     func isValid(token: String) -> Bool
 }
 
 class TokenValidator: TokenValidating {
     let tokenDecoder: TokenDecoding
+    let expiryThreshold: TimeInterval
 
-    init(tokenDecoder: TokenDecoding) {
+    init(tokenDecoder: TokenDecoding, expiryThreshold: TimeInterval = 300) {
         self.tokenDecoder = tokenDecoder
+        self.expiryThreshold = expiryThreshold
     }
 
     func isValid(token: String) -> Bool {
@@ -24,20 +25,11 @@ class TokenValidator: TokenValidating {
             return false
         }
 
-        print("Token username:", tokenPayload.username)
-
         return !isExpired(token: tokenPayload)
     }
 
-    func isExpired(token: TokenPayload) -> Bool {
-        let calendar = Calendar.current
-        let currentDate = Date()
-        let expirationDate = calendar.date(byAdding: .minute, value: 5, to: currentDate)
-
-        if let expirationDate = expirationDate {
-            return expirationDate > token.expiryDate
-        } else {
-            return false
-        }
+   private  func isExpired(token: TokenPayload) -> Bool {
+       let expirationdDateThreshold = Date(timeIntervalSinceNow: expiryThreshold)
+       return expirationdDateThreshold > token.expiryDate
     }
 }

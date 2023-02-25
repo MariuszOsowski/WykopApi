@@ -13,40 +13,30 @@ internal protocol ApiClientProtocol {
 
 internal final class WykopApiClient: ApiClientProtocol {
     private let session: URLSession
+    private let decoder: JSONDecoder
 
-    internal init() {
-        session = URLSession.shared
+    internal init(session: URLSession = URLSession.shared, decoder: JSONDecoder = JSONDecoder()) {
+        self.session = session
+        self.decoder = decoder
     }
 
     internal func send<T: WykopApiRequest>(_ request: T) async throws -> T.Response {
         let urlRequest = try request.urlRequest()
 
-        return try await withCheckedThrowingContinuation { continuation in
-            URLSession.shared.dataTask(with: urlRequest) { data, response, error in
-                guard let responseData = data, error == nil else {
-                    if let error = error {
-                        continuation.resume(throwing: WykopApiError.underlaying(error, response))
-                    } else {
-                        continuation.resume(throwing: WykopApiError.noData)
-                    }
-                    return
-                }
+        do {
+            let (data, _) = try await session.data(for: urlRequest)
+            let object = try decoder.decode(WykopApiResponse<T.Response>.self, from: data)
 
-                let decoder = JSONDecoder()
-
-                do {
-                    let object = try decoder.decode(WykopApiResponse<T.Response>.self, from: responseData)
-
-                    switch object {
-                    case WykopApiResponse<T.Response>.error(let error):
-                        continuation.resume(throwing: error)
-                    case WykopApiResponse<T.Response>.result(let response):
-                        continuation.resume(returning: response)
-                    }
-                } catch {
-                    continuation.resume(throwing: WykopApiError.decodingError(error))
-                }
-            }.resume()
+            switch object {
+            case WykopApiResponse<T.Response>.error(let error):
+                throw error
+            case WykopApiResponse<T.Response>.result(let response):
+                return response
+            }
+        } catch let error as DecodingError {
+            throw WykopApiError.decodingError(error)
+        } catch {
+            throw WykopApiError.underlaying(error)
         }
     }
 }

@@ -18,7 +18,8 @@ final class TokenDecoderTests: XCTestCase {
     static let invalidToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6InRlc3QtYXBwLWtleSIsInVzZXItaXAiOiJ0ZXN0LXVzZXItaXAiLCJyb2xlcyI6WyJST0xFX0FQUCJdLCJhcHAta2V5IjoidGVzdC1hcHAta2V5IiwiZXhwIjoxNjc3MTY1NTYyfQ"
     
     static let invalidPayloadToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmtZSI6InRlc3QtYXBwLWtleSIsInVzZXItaXAiOiJ0ZXN0LXVzZXItaXAiLCJyb2xlcyI6WyJST0xFX0FQUCJdLCJhcHAta2V5IjoidGVzdC1hcHAta2V5IiwiZXhwIjoxNjc3MTY1NTYyfQ.S3sfntLJJ-4efmv4omuRSrGysF-wXpiR8QXIvHx2PaQ"
-    
+
+    static let invalidJsonPayload = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6IlRlc3RVc2VyIiwidXNlci1pcCI6InRlc3QtdXNlci1pcCIscm9sZXMiOlsiUk9MRV9VU0VSIl0sImFwcC1rZXkiOiJ0ZXN0LWFwcC1rZXkiLCJleHAiOjE2NzY5OTQ3MDh9.pjDO9xxJ_xtVuCv_0ITlQ-w0NKyoXvpyVS2owFUZ7EI"
     
     func testUserTokenDecode() {
         let tokenPayload = try! TokenDecoder().decodePayload(token: Self.userToken)
@@ -42,6 +43,12 @@ final class TokenDecoderTests: XCTestCase {
     
     func testInvalidPayload() {
         XCTAssertThrowsError(try TokenDecoder().decodePayload(token: Self.invalidPayloadToken)) { (error) in
+            XCTAssertEqual(error as? TokenDecoderError, TokenDecoderError.decodingError)
+        }
+    }
+
+    func testInvalidJsonPayload() {
+        XCTAssertThrowsError(try TokenDecoder().decodePayload(token: Self.invalidJsonPayload)) { (error) in
             XCTAssertEqual(error as? TokenDecoderError, TokenDecoderError.decodingError)
         }
     }
