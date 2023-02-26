@@ -34,7 +34,7 @@ actor Authenticator: AuthenticationProtocol {
 
     private var tokenState: TokenState
     private let apiClient: ApiClientProtocol
-    private let keychain: KeychainWrapping
+    private let keyStore: KeyStoring
     private let tokenValidator: TokenValidating
     private let tokenDecoder: TokenDecoding
 
@@ -42,14 +42,14 @@ actor Authenticator: AuthenticationProtocol {
     private let key: String
 
     init(apiClient: ApiClientProtocol,
-         keychain: KeychainWrapping,
+         keyStore: KeyStoring,
          tokenValidator: TokenValidating,
          tokenDecoder: TokenDecoding,
          secret: String,
          key: String) {
         self.tokenState = .none
         self.apiClient = apiClient
-        self.keychain = keychain
+        self.keyStore = keyStore
         self.tokenValidator = tokenValidator
         self.tokenDecoder = tokenDecoder
         self.secret = secret
@@ -89,22 +89,22 @@ actor Authenticator: AuthenticationProtocol {
     }
 
     func logout() async throws {
-        keychain.delete(key: KeychainKey.token.rawValue)
-        keychain.delete(key: KeychainKey.refreshToken.rawValue)
+        keyStore.delete(key: KeychainKey.token.rawValue)
+        keyStore.delete(key: KeychainKey.refreshToken.rawValue)
 
         tokenState = .none
     }
 
     func login(token: String, refreshToken: String) async {
-        keychain.save(string: token, key: KeychainKey.token.rawValue)
-        keychain.save(string: refreshToken, key: KeychainKey.refreshToken.rawValue)
+        keyStore.save(string: token, key: KeychainKey.token.rawValue)
+        keyStore.save(string: refreshToken, key: KeychainKey.refreshToken.rawValue)
 
         tokenState = .userAuthenticated(token: token, refreshToken: refreshToken)
     }
 
     func initializeToken() async throws -> String {
-        guard let token = keychain.loadString(key: KeychainKey.token.rawValue),
-              let refreshToken = keychain.loadString(key: KeychainKey.refreshToken.rawValue) else {
+        guard let token = keyStore.loadString(key: KeychainKey.token.rawValue),
+              let refreshToken = keyStore.loadString(key: KeychainKey.refreshToken.rawValue) else {
             return try await authenticateApp()
         }
 
@@ -144,8 +144,8 @@ actor Authenticator: AuthenticationProtocol {
             let tokens = try await apiClient.send(WykopSecurityRequests.RefreshTokenRequest(refreshToken: refreshToken))
             tokenState = .userAuthenticated(token: tokens.token, refreshToken: tokens.refreshToken)
 
-            keychain.save(string: tokens.token, key: KeychainKey.token.rawValue)
-            keychain.save(string: tokens.refreshToken, key: KeychainKey.refreshToken.rawValue)
+            keyStore.save(string: tokens.token, key: KeychainKey.token.rawValue)
+            keyStore.save(string: tokens.refreshToken, key: KeychainKey.refreshToken.rawValue)
 
             return tokens.token
         }
