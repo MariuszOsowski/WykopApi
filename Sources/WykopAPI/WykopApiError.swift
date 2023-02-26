@@ -15,6 +15,7 @@ public enum WykopApiError: Error {
     case internalError
     case badServerResponse
     case statusCode(Int)
+    case wykopError(Int, String)
 }
 
 extension WykopApiError: LocalizedError {
@@ -34,6 +35,8 @@ extension WykopApiError: LocalizedError {
             return "Bad Server Response"
         case .statusCode(let code):
             return "Invalid Status Code: \(code)"
+        case .wykopError(let code, let message):
+            return "Wykop Error \(code): \(message)"
         }
     }
 }

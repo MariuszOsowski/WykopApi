@@ -29,7 +29,11 @@ internal final class WykopApiClient: ApiClientProtocol {
         }
 
         guard httpResponse.statusCode == 200 else {
-            throw WykopApiError.statusCode(httpResponse.statusCode)
+            if let errorResponse = try? decoder.decode(WykopApiErrorResponse.self, from: data) {
+                throw WykopApiError.wykopError(errorResponse.code, errorResponse.error.message)
+            } else {
+                throw WykopApiError.statusCode(httpResponse.statusCode)
+            }
         }
 
         do {

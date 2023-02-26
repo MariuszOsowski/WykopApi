@@ -12,22 +12,22 @@ internal enum WykopApiResponse<T: Decodable>: Decodable {
     case result(T)
 
     public init(from decoder: Decoder) throws {
-        do {
+        if let errorResponse = try? WykopApiErrorResponse(from: decoder) {
+            self = .error(errorResponse)
+        } else {
             self = .result(try WykopApiDataResponse<T>(from: decoder).data)
-        } catch DecodingError.keyNotFound {
-            self = .error(try WykopApiErrorResponse(from: decoder))
         }
     }
 }
 
-internal struct WykopApiErrorResponse: Decodable, Error {
-    let code: Int64
+internal struct WykopApiErrorResponse: Decodable, Error, LocalizedError {
+    let code: Int
     let hash: String
     let error: Error
 
     internal struct Error: Decodable {
         let message: String
-        let key: Int64
+        let key: Int
     }
 }
 

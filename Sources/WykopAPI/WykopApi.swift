@@ -12,6 +12,16 @@ public protocol WykopApiLoginDelegate: AnyObject {
     func loginComplete()
 }
 
+public class ApiCategory {
+    fileprivate let apiClient: ApiClientProtocol
+    fileprivate let authenticationManager: AuthenticationProtocol
+
+    fileprivate init(apiClient: ApiClientProtocol, authenticationManager: AuthenticationProtocol) {
+        self.apiClient = apiClient
+        self.authenticationManager = authenticationManager
+    }
+}
+
 public final class WykopApi {
     let apiClient: ApiClientProtocol
     let authenticationManager: AuthenticationProtocol
@@ -32,26 +42,11 @@ public final class WykopApi {
         tags = Tags(apiClient: apiClient, authenticationManager: authenticationManager)
     }
 
-    public final class Users {
-        private let apiClient: ApiClientProtocol
-        private let authenticationManager: AuthenticationProtocol
+    public final class Users: ApiCategory {}
+    public final class Tags: ApiCategory {}
+}
 
-        fileprivate init(apiClient: ApiClientProtocol, authenticationManager: AuthenticationProtocol) {
-            self.apiClient = apiClient
-            self.authenticationManager = authenticationManager
-        }
-    }
-
-    public final class Tags {
-        private let apiClient: ApiClientProtocol
-        private let authenticationManager: AuthenticationProtocol
-
-        fileprivate init(apiClient: ApiClientProtocol, authenticationManager: AuthenticationProtocol) {
-            self.apiClient = apiClient
-            self.authenticationManager = authenticationManager
-        }
-    }
-
+extension WykopApi {
     public func logout() async throws {
         try await authenticationManager.logout()
     }
