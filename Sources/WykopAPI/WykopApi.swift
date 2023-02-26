@@ -15,7 +15,9 @@ public protocol WykopApiLoginDelegate: AnyObject {
 public final class WykopApi {
     let apiClient: ApiClientProtocol
     let authenticationManager: AuthenticationProtocol
+
     public let users: Users
+    public let tags: Tags
     public weak var delegate: WykopApiLoginDelegate?
 
     public init(key: String, secret: String) {
@@ -27,9 +29,20 @@ public final class WykopApi {
                                               secret: secret,
                                               key: key)
         users = Users(apiClient: apiClient, authenticationManager: authenticationManager)
+        tags = Tags(apiClient: apiClient, authenticationManager: authenticationManager)
     }
 
     public final class Users {
+        private let apiClient: ApiClientProtocol
+        private let authenticationManager: AuthenticationProtocol
+
+        fileprivate init(apiClient: ApiClientProtocol, authenticationManager: AuthenticationProtocol) {
+            self.apiClient = apiClient
+            self.authenticationManager = authenticationManager
+        }
+    }
+
+    public final class Tags {
         private let apiClient: ApiClientProtocol
         private let authenticationManager: AuthenticationProtocol
 
@@ -63,5 +76,12 @@ public extension WykopApi.Users {
     func autocomplete(query: String) async throws -> [WKPUserAutocomplete] {
         let authToken = try await authenticationManager.authToken
         return try await apiClient.send(WykopUsersRequests.AutocompleteRequest(query: query, authToken: authToken))
+    }
+}
+
+public extension WykopApi.Tags {
+    func autocomplete(query: String) async throws -> [WKPTagAutocomplete] {
+        let authToken = try await authenticationManager.authToken
+        return try await apiClient.send(WykopTagRequests.AutocompleteRequest(query: query, authToken: authToken))
     }
 }

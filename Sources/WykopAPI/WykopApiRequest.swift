@@ -40,21 +40,10 @@ internal extension WykopApiRequest {
         return request
     }
 
-    func data() -> Data? {
-        return nil
-    }
-
-    var requestBody: Encodable? {
-        return nil
-    }
-
-    var queryItems: [URLQueryItem]? {
-        return nil
-    }
-
-    var headers: [String: String] {
-        return [:]
-    }
+    func data() -> Data? { return nil }
+    var requestBody: Encodable? { return nil }
+    var queryItems: [URLQueryItem]? { return nil }
+    var headers: [String: String] { return [:] }
 }
 
 private extension WykopApiRequest {

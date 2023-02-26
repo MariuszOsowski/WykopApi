@@ -15,16 +15,24 @@ internal final class WykopApiClient: ApiClientProtocol {
     private let session: URLSession
     private let decoder: JSONDecoder
 
-    internal init(session: URLSession = URLSession.shared, decoder: JSONDecoder = JSONDecoder()) {
+    internal init(session: URLSession = .shared, decoder: JSONDecoder = .wykopDecoder) {
         self.session = session
         self.decoder = decoder
     }
 
     internal func send<T: WykopApiRequest>(_ request: T) async throws -> T.Response {
         let urlRequest = try request.urlRequest()
+        let (data, response) = try await data(for: urlRequest)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw WykopApiError.badServerResponse
+        }
+
+        guard httpResponse.statusCode == 200 else {
+            throw WykopApiError.statusCode(httpResponse.statusCode)
+        }
 
         do {
-            let (data, _) = try await session.data(for: urlRequest)
             let object = try decoder.decode(WykopApiResponse<T.Response>.self, from: data)
 
             switch object {
@@ -35,8 +43,15 @@ internal final class WykopApiClient: ApiClientProtocol {
             }
         } catch let error as DecodingError {
             throw WykopApiError.decodingError(error)
+        }
+    }
+
+    private func data(for urlRequest: URLRequest) async throws -> (Data, URLResponse) {
+        do {
+            return try await session.data(for: urlRequest)
         } catch {
             throw WykopApiError.underlaying(error)
         }
+
     }
 }

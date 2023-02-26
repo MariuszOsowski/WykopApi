@@ -33,11 +33,6 @@ extension WykopSecurityRequests {
         internal struct Response: Decodable {
             let refreshToken: String
             let token: String
-
-            enum CodingKeys: String, CodingKey {
-                case refreshToken = "refresh_token"
-                case token
-            }
         }
 
         var refreshToken: String
@@ -57,10 +52,6 @@ extension WykopSecurityRequests {
     internal struct ConnectRequest: WykopApiRequest {
         struct Response: Decodable {
             let connectUrl: String
-
-            enum CodingKeys: String, CodingKey {
-                case connectUrl = "connect_url"
-            }
         }
 
         var authToken: String
