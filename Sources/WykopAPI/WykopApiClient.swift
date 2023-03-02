@@ -7,11 +7,11 @@
 
 import Foundation
 
-internal protocol ApiClientProtocol {
+internal protocol ApiClient {
     func send<T: WykopApiRequest>(_ request: T) async throws -> T.Response
 }
 
-internal final class WykopApiClient: ApiClientProtocol {
+internal final class WykopApiClient: ApiClient {
     private let session: URLSession
     private let decoder: JSONDecoder
 

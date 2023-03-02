@@ -15,7 +15,7 @@ class TokenValidator: TokenValidating {
     let tokenDecoder: TokenDecoding
     let expiryThreshold: TimeInterval
 
-    init(tokenDecoder: TokenDecoding, expiryThreshold: TimeInterval = 300) {
+    init(tokenDecoder: TokenDecoding = TokenDecoder(), expiryThreshold: TimeInterval = 300) {
         self.tokenDecoder = tokenDecoder
         self.expiryThreshold = expiryThreshold
     }

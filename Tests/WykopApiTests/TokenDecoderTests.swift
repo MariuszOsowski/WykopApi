@@ -10,46 +10,70 @@ import Foundation
 import XCTest
 @testable import WykopApi
 
-final class TokenDecoderTests: XCTestCase {
-    static let userToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6IlRlc3RVc2VyIiwidXNlci1pcCI6InRlc3QtdXNlci1pcCIsInJvbGVzIjpbIlJPTEVfVVNFUiJdLCJhcHAta2V5IjoidGVzdC1hcHAta2V5IiwiZXhwIjoxNjc2OTk0NzA4fQ.pjDO9xxJ_xtVuCv_0ITlQ-w0NKyoXvpyVS2owFUZ7EI"
-    
-    static let appToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6InRlc3QtYXBwLWtleSIsInVzZXItaXAiOiJ0ZXN0LXVzZXItaXAiLCJyb2xlcyI6WyJST0xFX0FQUCJdLCJhcHAta2V5IjoidGVzdC1hcHAta2V5IiwiZXhwIjoxNjc3MTY1NTYyfQ.S3sfntLJJ-4efmv4omuRSrGysF-wXpiR8QXIvHx2PaQ"
-    
-    static let invalidToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6InRlc3QtYXBwLWtleSIsInVzZXItaXAiOiJ0ZXN0LXVzZXItaXAiLCJyb2xlcyI6WyJST0xFX0FQUCJdLCJhcHAta2V5IjoidGVzdC1hcHAta2V5IiwiZXhwIjoxNjc3MTY1NTYyfQ"
-    
-    static let invalidPayloadToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmtZSI6InRlc3QtYXBwLWtleSIsInVzZXItaXAiOiJ0ZXN0LXVzZXItaXAiLCJyb2xlcyI6WyJST0xFX0FQUCJdLCJhcHAta2V5IjoidGVzdC1hcHAta2V5IiwiZXhwIjoxNjc3MTY1NTYyfQ.S3sfntLJJ-4efmv4omuRSrGysF-wXpiR8QXIvHx2PaQ"
+extension TokenPayload: Equatable {
+    static public func == (lhs: TokenPayload, rhs: TokenPayload) -> Bool {
+        return lhs.username == rhs.username && lhs.expiryDate == rhs.expiryDate && lhs.roles == rhs.roles
+    }
+}
 
-    static let invalidJsonPayload = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6IlRlc3RVc2VyIiwidXNlci1pcCI6InRlc3QtdXNlci1pcCIscm9sZXMiOlsiUk9MRV9VU0VSIl0sImFwcC1rZXkiOiJ0ZXN0LWFwcC1rZXkiLCJleHAiOjE2NzY5OTQ3MDh9.pjDO9xxJ_xtVuCv_0ITlQ-w0NKyoXvpyVS2owFUZ7EI"
-    
-    func testUserTokenDecode() {
-        let tokenPayload = try! TokenDecoder().decodePayload(token: Self.userToken)
-        XCTAssertEqual(tokenPayload.username, "TestUser")
-        XCTAssertEqual(tokenPayload.expiryDate.timeIntervalSince1970, 1676994708.0)
-        XCTAssertTrue(tokenPayload.roles.contains("ROLE_USER"))
+final class TokenDecoderTests: XCTestCase {
+    var sut: TokenDecoder!
+    var mockJsonDecoder: MockJsonDecoder<TokenPayload>!
+    var mockBase64Decoder: MockBase64Decoder!
+    var mockTokenSplitter: MockTokenSplitter!
+
+    override func setUp() {
+        mockJsonDecoder = MockJsonDecoder<TokenPayload>()
+        mockBase64Decoder = MockBase64Decoder()
+        mockTokenSplitter = MockTokenSplitter()
+        sut = TokenDecoder(jsonDecoder: mockJsonDecoder,
+                           base64Decoder: mockBase64Decoder,
+                           tokenSplitter: mockTokenSplitter)
     }
-    
-    func testAppTokenDecode() {
-        let tokenPayload = try! TokenDecoder().decodePayload(token: Self.appToken)
-        XCTAssertEqual(tokenPayload.username, "test-app-key")
-        XCTAssertEqual(tokenPayload.expiryDate.timeIntervalSince1970, 1677165562)
-        XCTAssertTrue(tokenPayload.roles.contains("ROLE_APP"))
-    }
-    
-    func testInvalidToken() {
-        XCTAssertThrowsError(try TokenDecoder().decodePayload(token: Self.invalidToken)) { (error) in
+
+    func testInvalidTokenStructureDecode() {
+        mockTokenSplitter.stubResult = nil
+
+        XCTAssertThrowsError(try sut.decodePayload(token: "test-token")) { (error) in
+            XCTAssertEqual(mockTokenSplitter.capturedToken, "test-token", "Invalid token passed to tokenSplitter")
+            XCTAssertNil(mockBase64Decoder.capturedBase64, "Should not try to decode base64 payload")
+            XCTAssertNil(mockJsonDecoder.caputuredData, "Should not try to decode json payload")
             XCTAssertEqual(error as? TokenDecoderError, TokenDecoderError.invalidToken)
         }
     }
-    
-    func testInvalidPayload() {
-        XCTAssertThrowsError(try TokenDecoder().decodePayload(token: Self.invalidPayloadToken)) { (error) in
+
+    func testInvalidBase64Paylaod() {
+        mockTokenSplitter.stubResult = "base64-decoded-payload"
+        mockBase64Decoder.stubResult = nil
+
+        XCTAssertThrowsError(try sut.decodePayload(token: "test-token")) { (error) in
+            XCTAssertEqual(mockBase64Decoder.capturedBase64, "base64-decoded-payload", "Should pass payload from token splitter to base64Decoder")
+            XCTAssertNil(mockJsonDecoder.caputuredData, "Should not try to decode json payload")
+            XCTAssertEqual(error as? TokenDecoderError, TokenDecoderError.invalidToken)
+        }
+    }
+
+    func testJsonDecodingError() {
+        let mockJsonData = "mock-json".data(using: .utf8)
+        mockTokenSplitter.stubResult = "base64-decoded-payload"
+        mockBase64Decoder.stubResult = mockJsonData
+        mockJsonDecoder.stubResult = .error(NSError(domain: "token.decoder.test", code: 0))
+
+        XCTAssertThrowsError(try sut.decodePayload(token: "test-token")) { (error) in
+            XCTAssertEqual(mockJsonDecoder.caputuredData, mockJsonData, "Should pass base64 decoded payload to json decoder")
             XCTAssertEqual(error as? TokenDecoderError, TokenDecoderError.decodingError)
         }
     }
 
-    func testInvalidJsonPayload() {
-        XCTAssertThrowsError(try TokenDecoder().decodePayload(token: Self.invalidJsonPayload)) { (error) in
-            XCTAssertEqual(error as? TokenDecoderError, TokenDecoderError.decodingError)
-        }
+    func testSuccessfulDecoding() throws {
+        let mockJsonData = "mock-json".data(using: .utf8)
+        let mockPayload = TokenPayload(username: "", expiryDate: Date(), roles: ["d"])
+        mockTokenSplitter.stubResult = "base64-decoded-payload"
+        mockBase64Decoder.stubResult = mockJsonData
+        mockJsonDecoder.stubResult = .success(mockPayload)
+
+        let payload = try sut.decodePayload(token: "test-token")
+        XCTAssertEqual(mockJsonDecoder.caputuredData, mockJsonData, "Should pass base64 decoded payload to json decoder")
+        XCTAssertEqual(payload, mockPayload, "Should return decoded payload")
     }
 }

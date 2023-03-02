@@ -15,7 +15,7 @@ enum AuthenticationState {
 protocol AuthenticationProtocol {
     var state: AuthenticationState { get async throws }
     var authToken: String { get async throws }
-    func logout() async throws
+    func logout() async
     func login(token: String, refreshToken: String) async
 }
 
@@ -33,7 +33,7 @@ actor Authenticator: AuthenticationProtocol {
     }
 
     private var tokenState: TokenState
-    private let apiClient: ApiClientProtocol
+    private let apiClient: ApiClient
     private let keyStore: KeyStoring
     private let tokenValidator: TokenValidating
     private let tokenDecoder: TokenDecoding
@@ -41,7 +41,7 @@ actor Authenticator: AuthenticationProtocol {
     private let secret: String
     private let key: String
 
-    init(apiClient: ApiClientProtocol,
+    init(apiClient: ApiClient,
          keyStore: KeyStoring,
          tokenValidator: TokenValidating,
          tokenDecoder: TokenDecoding,
@@ -88,7 +88,7 @@ actor Authenticator: AuthenticationProtocol {
         }
     }
 
-    func logout() async throws {
+    func logout() async {
         keyStore.delete(key: KeychainKey.token.rawValue)
         keyStore.delete(key: KeychainKey.refreshToken.rawValue)
 
