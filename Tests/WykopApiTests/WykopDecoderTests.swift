@@ -15,7 +15,7 @@ final class WykopDecoderTests: XCTestCase {
         let decoder = JSONDecoder.wykopDecoder
 
         guard case JSONDecoder.KeyDecodingStrategy.convertFromSnakeCase = decoder.keyDecodingStrategy else {
-            XCTFail()
+            XCTFail("Invalid decoding strategy")
             return
         }
     }

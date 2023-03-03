@@ -27,7 +27,8 @@ final class TokenValidatorTests: XCTestCase {
 
     func testNotExpitedToken() {
         let mockTokenDecoder = MockTokenDecoder()
-        mockTokenDecoder.stubResult = .payload(TokenPayload(username: "", expiryDate: Date(timeIntervalSinceNow: 3600), roles: []))
+        let payload = TokenPayload(username: "", expiryDate: Date(timeIntervalSinceNow: 3600), roles: [])
+        mockTokenDecoder.stubResult = .payload(payload)
 
         let isValid = TokenValidator(tokenDecoder: mockTokenDecoder).isValid(token: "token")
 
@@ -36,7 +37,8 @@ final class TokenValidatorTests: XCTestCase {
 
     func testExpitedToken() {
         let mockTokenDecoder = MockTokenDecoder()
-        mockTokenDecoder.stubResult = .payload(TokenPayload(username: "", expiryDate: Date(timeIntervalSinceNow: 100), roles: []))
+        let payload = TokenPayload(username: "", expiryDate: Date(timeIntervalSinceNow: 100), roles: [])
+        mockTokenDecoder.stubResult = .payload(payload)
 
         let isValid = TokenValidator(tokenDecoder: mockTokenDecoder).isValid(token: "token")
 

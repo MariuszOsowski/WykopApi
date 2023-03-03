@@ -40,3 +40,9 @@ extension WykopApiError: LocalizedError {
         }
     }
 }
+
+extension WykopApiError: Equatable {
+    public static func == (lhs: WykopApiError, rhs: WykopApiError) -> Bool {
+        return lhs.localizedDescription == rhs.localizedDescription
+    }
+}

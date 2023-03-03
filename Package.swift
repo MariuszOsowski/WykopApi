@@ -9,13 +9,13 @@ let package = Package(
         .macOS(.v10_15),
         .iOS(.v13),
         .watchOS(.v6),
-        .tvOS(.v13),
+        .tvOS(.v13)
     ],
     products: [
         // Products define the executables and libraries a package produces, and make them visible to other packages.
         .library(
             name: "WykopApi",
-            targets: ["WykopApi"]),
+            targets: ["WykopApi"])
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
@@ -29,6 +29,6 @@ let package = Package(
             dependencies: []),
         .testTarget(
             name: "WykopApiTests",
-            dependencies: ["WykopApi"]),
+            dependencies: ["WykopApi"])
     ]
 )

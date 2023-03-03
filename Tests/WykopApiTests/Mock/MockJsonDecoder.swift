@@ -20,7 +20,7 @@ class MockJsonDecoder<RT: Decodable>: JSONDecoder {
     var stubResult: ResultStub?
     var caputuredData: Data?
 
-    override func decode<T>(_ type: T.Type, from data: Data) throws -> T where T : Decodable {
+    override func decode<T>(_ type: T.Type, from data: Data) throws -> T where T: Decodable {
         caputuredData = data
 
         guard let stubResult = stubResult else {

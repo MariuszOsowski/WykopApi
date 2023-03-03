@@ -19,7 +19,7 @@ class MockTokenDecoder: TokenDecoding {
     }
 
     var stubResult: StubResult = .error(MockError.decodingError)
-    private(set) var token: String? = nil
+    private(set) var token: String?
 
     func decodePayload(token: String) throws -> TokenPayload {
         self.token = token
@@ -30,5 +30,5 @@ class MockTokenDecoder: TokenDecoding {
         case .payload(let tokenPayload):
             return tokenPayload
         }
-    }  
+    }
 }
