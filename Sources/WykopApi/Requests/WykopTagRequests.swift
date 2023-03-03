@@ -9,7 +9,7 @@ import Foundation
 
 struct WykopTagRequests {
     internal struct AutocompleteRequest: WykopApiRequest {
-        typealias Response = [WKPTagAutocomplete]
+        typealias Response = [WKPTagShort]
 
         var query: String
         var authToken: String
