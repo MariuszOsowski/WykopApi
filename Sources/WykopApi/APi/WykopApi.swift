@@ -57,7 +57,7 @@ extension WykopApi {
     private func login(token: String, refreshToken: String) {
         Task {
             await authenticationManager.login(token: token, refreshToken: refreshToken)
-            delegate?.loginComplete()
+//            delegate?.loginComplete()
         }
     }
 }
