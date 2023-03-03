@@ -36,8 +36,9 @@ final class Keychain: KeyStoring {
     }
 
     func save(string: String, key: String) {
-        guard let data = string.data(using: .utf8) else { return }
-        return save(data: data, key: key)
+        if let data = string.data(using: .utf8) {
+            save(data: data, key: key)
+        }
     }
 
     func load(key: String) -> Data? {

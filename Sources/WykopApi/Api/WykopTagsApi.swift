@@ -8,7 +8,7 @@
 import Foundation
 
 public final class WykopTagsApi: WykopApiCategory {
-    public func autocomplete(query: String) async throws -> [WKPTagAutocomplete] {
+    public func autocomplete(query: String) async throws -> [WKPTagShort] {
         let authToken = try await authenticationManager.authToken
         return try await apiClient.send(WykopTagRequests.AutocompleteRequest(query: query, authToken: authToken))
     }
