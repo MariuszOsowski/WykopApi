@@ -41,7 +41,7 @@ class MockAuthenticationManager: AuthenticationProtocol {
 
     var authToken: String {
         get throws {
-            authTokenCallCounter += 1
+            authTokenCallCounter = authTokenCallCounter +   1 
             switch tokenStub {
             case .token(let token):
                 return token
