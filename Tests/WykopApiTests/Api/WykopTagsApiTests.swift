@@ -10,12 +10,6 @@ import Foundation
 import XCTest
 @testable import WykopApi
 
-extension WKPTagAutocomplete: Equatable {
-    public static func == (lhs: WKPTagAutocomplete, rhs: WKPTagAutocomplete) -> Bool {
-        return lhs.name == rhs.name
-    }
-}
-
 extension WKPTag: Equatable {
     public static func == (lhs: WKPTag, rhs: WKPTag) -> Bool {
         return lhs.name == rhs.name
@@ -88,7 +82,7 @@ final class WykopTagsApiTests: XCTestCase {
 
     func testAutocompleteResult() async {
         mockAuthenticationManager.tokenStub = .token("test-auth-token")
-        let apiClientResponse = [WKPTagAutocomplete(name: "test-tag")]
+        let apiClientResponse = [WKPTagShort(name: "test-tag")]
         mockApiClient.responseStub = .value(apiClientResponse)
         var didFailWithError: Error?
 
