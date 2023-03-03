@@ -18,6 +18,15 @@ jobs:
     steps:
       - checkout
       - run: swift test -v
+
+  swiftlint:
+    macos:
+      xcode: 14.2.0 # Specify the Xcode version to use
+
+    steps:
+      - checkout
+      - run: brew install swiftlint
+      - run: swiftlint lint --strict     
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:
@@ -25,3 +34,4 @@ workflows:
     # Inside the workflow, you define the jobs you want to run.
     jobs:
       - unit_test
+      - swiftlint
