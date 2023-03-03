@@ -21,7 +21,7 @@ class MockApiClient: ApiClient {
     private(set) var capturedRequest: (any WykopApiRequest)?
     var responseStub: ResponseStub = .error(NSError(domain: "mock.api.client", code: 0))
 
-    func send<T>(_ request: T) async throws -> T.Response where T : WykopApiRequest {
+    func send<T>(_ request: T) async throws -> T.Response where T: WykopApiRequest {
         capturedRequest = request
 
         switch responseStub {
