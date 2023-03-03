@@ -14,6 +14,8 @@ internal protocol WykopApiRequest {
     var queryItems: [URLQueryItem]? { get }
     var headers: [String: String] { get }
     var requestBody: Encodable? { get }
+    var urlBuilder: UrlBuilding? { get }
+    var encoder: JSONEncoder? { get }
     func urlRequest() throws -> URLRequest
 }
 
@@ -44,24 +46,26 @@ internal extension WykopApiRequest {
     var requestBody: Encodable? { return nil }
     var queryItems: [URLQueryItem]? { return nil }
     var headers: [String: String] { return [:] }
+    var urlBuilder: UrlBuilding? { return UrlBuilder.shared }
+    var encoder: JSONEncoder? { return JSONEncoder.wykopEncoder }
 }
 
 private extension WykopApiRequest {
     private func buildUrl() -> URL? {
-        guard var components = URLComponents(string: WykopURL.APIv3.rawValue + self.path) else {
-            return nil
-        }
-
-        components.queryItems = queryItems
-        return components.url
+        return urlBuilder?.buildUrl(basePath: WykopURL.APIv3.rawValue,
+                                    endpoint: self.path,
+                                    queryItems: self.queryItems)
     }
 
     private func encode(body: Encodable) throws -> Data {
+        guard let encoder = encoder else {
+            throw WykopApiError.internalError
+        }
+
         do {
-            return try JSONEncoder().encode(body)
+            return try encoder.encode(body)
         } catch {
             throw WykopApiError.encodingError(error)
         }
     }
-
 }

@@ -1,5 +1,5 @@
 //
-//  TagsAutocompleteRequestTests.swift
+//  WykopTagRequestsTests.swift
 //
 //
 //  Created by Mariusz Osowski on 02/03/2023.
@@ -10,7 +10,7 @@ import Foundation
 import XCTest
 @testable import WykopApi
 
-final class TagsAutocompleteRequestTests: XCTestCase {
+final class WykopTagRequestsTests: XCTestCase {
     func testAutocompleteRequest() throws {
         let urlRequest = try WykopTagRequests.AutocompleteRequest(query: "query-string", authToken: "auth-token").urlRequest()
 
