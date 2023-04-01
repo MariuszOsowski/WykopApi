@@ -9,7 +9,6 @@
 import Quick
 import Nimble
 import Foundation
-import XCTest
 
 @testable import WykopApi
 

@@ -12,6 +12,7 @@ jobs:
     # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
     macos:
       xcode: 14.2.0 # Specify the Xcode version to use
+    resource_class: macos.x86.medium.gen2
 
     # Add steps to the job
     # See: https://circleci.com/docs/2.0/configuration-reference/#steps
@@ -25,6 +26,7 @@ jobs:
   swiftlint:
     macos:
       xcode: 14.2.0 # Specify the Xcode version to use
+    resource_class: macos.x86.medium.gen2
 
     steps:
       - checkout
